@@ -1,0 +1,122 @@
+version: "3.9"
+
+volumes:
+  wordpress_vol:
+    name: wordpress_vol
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/zwina/data/wordpress_vol
+      o: bind
+  mariadb_vol:
+    name: mariadb_vol
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/zwina/data/mariadb_vol
+      o: bind
+
+networks:
+  inception_net:
+    name: inception_net
+    driver: bridge
+
+services:
+
+  nginx:
+    container_name: nginx
+    pull_policy: never
+    build: services/nginx
+    image: nginx
+    depends_on:
+      - wordpress
+      - adminer
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - wordpress_vol:/var/www/html
+    networks:
+      - inception_net
+    ports:
+      - "443:443"
+
+  wordpress:
+    container_name: wordpress
+    pull_policy: never
+    build: services/wordpress
+    image: wordpress
+    depends_on:
+      - mariadb
+      - redis
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - wordpress_vol:/var/www/html
+    networks:
+      - inception_net
+
+  mariadb:
+    container_name: mariadb
+    pull_policy: never
+    build: services/mariadb
+    image: mariadb
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - mariadb_vol:/var/lib/mysql
+    networks:
+      - inception_net
+
+  redis:
+    container_name: redis
+    pull_policy: never
+    build: services/bonus/redis
+    image: redis
+    restart: unless-stopped
+    networks:
+      - inception_net
+
+  adminer:
+    container_name: adminer
+    pull_policy: never
+    build: services/bonus/adminer
+    image: adminer
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+    networks:
+      - inception_net
+
+  ftp:
+    container_name: ftp
+    pull_policy: never
+    build: services/bonus/ftp
+    image: ftp
+    depends_on:
+      - wordpress
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - wordpress_vol:/ftp
+    networks:
+      - inception_net
+    ports:
+      - "21:21"
+      - "40000-40009:40000-40009"
+
+  cadvisor:
+    container_name: cadvisor
+    pull_policy: never
+    build: services/bonus/cadvisor
+    image: cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro 
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - inception_net
+    ports:
+      - "8080:8080"
