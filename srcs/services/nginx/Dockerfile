@@ -6,7 +6,7 @@
 #    By: zwina <zwina@student.1337.ma>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/06 07:46:12 by zwina             #+#    #+#              #
-#    Updated: 2023/05/21 19:50:36 by zwina            ###   ########.fr        #
+#    Updated: 2023/05/31 18:25:23 by zwina            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,6 @@ RUN mkdir -p /etc/nginx/ssl && \
         -out /etc/nginx/ssl/certificate.pem \
         -subj "/O=1337 School/CN=zwina.42.fr"
 
-COPY conf/nginx.conf /etc/nginx/conf.d/nginx.conf
+COPY conf/nginx.conf /etc/nginx/conf.d
 
 CMD [ "nginx", "-g", "daemon off;" ]

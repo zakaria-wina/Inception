@@ -120,3 +120,12 @@ services:
       - inception_net
     ports:
       - "8080:8080"
+
+  website:
+    container_name: website
+    pull_policy: never
+    build: services/bonus/website
+    image: website
+    restart: unless-stopped
+    networks:
+      - inception_net
